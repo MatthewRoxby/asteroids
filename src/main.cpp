@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <fstream>
+#include <string>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -10,23 +12,6 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "layout (location = 1) in vec2 aUV;\n"
-    "out vec2 pass_uv;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "   pass_uv = aUV;\n"
-    "}\0";
-const char *fragmentShaderSource = "#version 330 core\n"
-    "in vec2 pass_uv;\n"
-    "out vec4 FragColor;\n"
-    "uniform float time;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(pass_uv, sin(time) * 0.5 + 0.5, 1.0f);\n"
-    "}\n\0";
 
 int main()
 {
@@ -66,6 +51,21 @@ int main()
     // ------------------------------------
     // vertex shader
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    
+    std::ifstream vertexFile("./shadercode/test.vert");
+    std::string contents;
+    
+    if(vertexFile.is_open()){
+        std::string str;
+        while (std::getline(vertexFile, str))
+        {
+            contents += str;
+            contents.push_back('\n');
+        }
+    }
+
+    std::cout << "vertex file: " << contents << std::endl;
+    const char* vertexShaderSource = contents.c_str();
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
     // check for shader compile errors
@@ -74,11 +74,27 @@ int main()
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
+    
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
     // fragment shader
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    std::ifstream fragmentFile("./shadercode/test.frag");
+    std::string contents2;
+    
+    if(fragmentFile.is_open()){
+        
+        std::string str;
+
+        while (std::getline(fragmentFile, str))
+        {
+            contents2 += str;
+            contents2.push_back('\n');
+        }  
+    }
+
+    const char *fragmentShaderSource = contents2.c_str();
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
     // check for shader compile errors
