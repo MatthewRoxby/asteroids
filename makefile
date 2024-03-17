@@ -1,2 +1,2 @@
 run:
-	g++ ./src/*.cpp ./src/*.c -o main -ldl -lglfw
+	g++ ./src/*.cpp ./src/*.c -o bin/main -ldl -lglfw

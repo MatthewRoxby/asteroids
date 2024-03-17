@@ -12,15 +12,20 @@ const unsigned int SCR_HEIGHT = 600;
 
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 1) in vec2 aUV;\n"
+    "out vec2 pass_uv;\n"
     "void main()\n"
     "{\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   pass_uv = aUV;\n"
     "}\0";
 const char *fragmentShaderSource = "#version 330 core\n"
+    "in vec2 pass_uv;\n"
     "out vec4 FragColor;\n"
+    "uniform float time;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+    "   FragColor = vec4(pass_uv, sin(time) * 0.5 + 0.5, 1.0f);\n"
     "}\n\0";
 
 int main()
@@ -106,6 +111,13 @@ int main()
         0.5, 0.5, 0.0
     };
 
+    float uvs[] = {
+        0.0,0.0,
+        1.0,1.0,
+        0.0,1.0,
+        1.0,0.0
+    };
+
     unsigned int indices[] = {
         0,1,2,0,3,1
     };
@@ -121,6 +133,20 @@ int main()
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    //UV
+    unsigned int UVBO;
+
+    glGenVertexArrays(1, &UVBO);
+    glGenBuffers(1, &UVBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, UVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+
+
     
     //EBO
 
@@ -155,6 +181,7 @@ int main()
 
         // draw our first triangle
         glUseProgram(shaderProgram);
+        glUniform1f(glGetUniformLocation(shaderProgram, "time"), glfwGetTime());
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         // glBindVertexArray(0); // no need to unbind it every time 
